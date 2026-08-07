@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyHub — Command Desk</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg-0:#0a0b08;
+  --bg-1:#101208;
+  --bg-2:#161810;
+  --bg-3:#1d2016;
+  --line:#2a2d20;
+  --line-soft:#1c1e15;
+  --cream:#f1ead9;
+  --cream-dim:#b8b19f;
+  --cream-dimmer:#7d7869;
+  --amber:#e8a33d;
+  --amber-dim:#8a6526;
+  --sage:#8fae8b;
+  --sage-dim:#4d5f4a;
+  --rust:#c1573a;
+  --shadow-lg: 0 30px 80px -20px rgba(0,0,0,.7);
+  --radius: 14px;
+  --serif: 'Fraunces', Georgia, serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+
+::selection{background:var(--amber); color:var(--bg-0);}
+
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line); border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--amber-dim);}
+
+html,body{
+  height:100%;
+  background:var(--bg-0);
+  color:var(--cream);
+  font-family:var(--mono);
+  overflow-x:hidden;
+}
+
+body{
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(241,234,217,0.06) 1px, transparent 0);
+  background-size: 28px 28px;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+
+body::before{
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(232,163,61,0.08), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 90% 100%, rgba(143,174,139,0.05), transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ============ BROWSER CHROME ============ */
+.chrome{
+  position:relative; z-index:5;
+  background:var(--bg-1);
+  border-bottom:1px solid var(--line);
+}
+.tabstrip{
+  display:flex; align-items:flex-end; gap:2px;
+  padding:10px 14px 0;
+}
+.tab{
+  display:flex; align-items:center; gap:8px;
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-bottom:none;
+  border-radius:10px 10px 0 0;
+  padding:9px 16px;
+  font-size:12.5px;
+  color:var(--cream-dim);
+  position:relative;
+  min-width:180px;
+}
+.tab.active{
+  background:var(--bg-3);
+  color:var(--cream);
+  box-shadow: 0 -2px 0 var(--amber) inset;
+}
+.tab .dot{width:7px; height:7px; border-radius:50%; background:var(--sage); flex-shrink:0;}
+.tab .close{margin-left:auto; opacity:.4; font-size:14px; line-height:1;}
+.tab-new{
+  color:var(--cream-dimmer);
+  padding:9px 12px;
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+  border-radius:8px 8px 0 0;
+  transition:.15s;
+}
+.tab-new:hover{color:var(--amber); background:var(--bg-2);}
+.navbar{
+  display:flex; align-items:center; gap:14px;
+  padding:11px 16px;
+  background:var(--bg-3);
+  border-bottom: 1px solid var(--line);
+}
+.nav-btn{
+  width:30px; height:30px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:8px;
+  color:var(--cream-dimmer);
+  cursor:pointer;
+  font-size:15px;
+  border:1px solid transparent;
+  transition:.15s;
+  user-select:none;
+}
+.nav-btn:hover{background:var(--bg-2); color:var(--cream); border-color:var(--line);}
+.omnibar{
+  flex:1;
+  display:flex; align-items:center; gap:10px;
+  background:var(--bg-1);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:8px 16px;
+  transition:.2s;
+}
+.omnibar:focus-within{
+  border-color:var(--amber-dim);
+  box-shadow:0 0 0 3px rgba(232,163,61,0.1);
+}
+.omnibar .lock{color:var(--sage); font-size:12px;}
+.omnibar input{
+  flex:1;
+  background:none; border:none; outline:none;
+  color:var(--cream);
+  font-family:var(--mono);
+  font-size:13px;
+}
+.omnibar input::placeholder{color:var(--cream-dimmer);}
+.engine-pick{
+  display:flex; gap:3px;
+  background:var(--bg-2);
+  padding:3px; border-radius:8px;
+  border:1px solid var(--line-soft);
+}
+.engine-pick button{
+  background:none; border:none;
+  color:var(--cream-dimmer);
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.04em;
+  padding:4px 8px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:.15s;
+}
+.engine-pick button.active{background:var(--amber); color:var(--bg-0); font-weight:700;}
+.engine-pick button:not(.active):hover{color:var(--cream); background:var(--bg-3);}
+
+.chrome-right{display:flex; align-items:center; gap:10px;}
+.icon-btn{
+  width:30px; height:30px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:8px;
+  cursor:pointer;
+  color:var(--cream-dimmer);
+  font-size:14px;
+  border:1px solid transparent;
+  transition:.15s;
+}
+.icon-btn:hover{background:var(--bg-2); border-color:var(--line); color:var(--amber);}
+
+/* ============ MAIN ============ */
+main{
+  flex:1;
+  position:relative; z-index:2;
+  max-width:1180px;
+  width:100%;
+  margin:0 auto;
+  padding:54px 28px 90px;
+}
+
+.hero{
+  text-align:center;
+  margin-bottom:38px;
+}
+.wordmark{
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:56px;
+  letter-spacing:-.01em;
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  color:var(--cream);
+}
+.wordmark .accent{color:var(--amber); font-style:italic; font-weight:500;}
+.tagline{
+  margin-top:8px;
+  font-size:12.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--cream-dimmer);
+}
+
+.search-hero{
+  max-width:680px;
+  margin:30px auto 0;
+  position:relative;
+}
+.search-hero .box{
+  display:flex; align-items:center; gap:12px;
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:16px 20px;
+  box-shadow:var(--shadow-lg);
+  transition:.2s;
+}
+.search-hero .box:focus-within{
+  border-color:var(--amber-dim);
+  transform:translateY(-1px);
+}
+.search-hero input{
+  flex:1; background:none; border:none; outline:none;
+  color:var(--cream);
+  font-family:var(--serif);
+  font-size:19px;
+}
+.search-hero input::placeholder{color:var(--cream-dimmer); font-style:italic;}
+.search-hero .go{
+  color:var(--bg-0);
+  background:var(--amber);
+  border:none;
+  width:36px; height:36px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:15px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+  transition:.15s;
+}
+.search-hero .go:hover{background:#f2b856; transform:scale(1.05);}
+.search-meta{
+  display:flex; justify-content:center; gap:16px;
+  margin-top:10px;
+  font-size:10.5px;
+  color:var(--cream-dimmer);
+  letter-spacing:.05em;
+}
+.search-meta kbd{
+  background:var(--bg-3); border:1px solid var(--line);
+  border-radius:4px; padding:1px 5px;
+  font-family:var(--mono);
+  color:var(--cream-dim);
+}
+
+/* ============ BENTO GRID ============ */
+.bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:16px;
+  margin-top:46px;
+}
+.card{
+  background:var(--bg-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(232,163,61,.5), transparent);
+}
+.card-head{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+.card-title{
+  font-family:var(--serif);
+  font-size:15px;
+  font-weight:600;
+  display:flex; align-items:center; gap:8px;
+  color:var(--cream);
+}
+.card-title .glyph{
+  color:var(--amber);
+  font-size:13px;
+}
+.card-sub{
+  font-size:10px;
+  color:var(--cream-dimmer);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+/* --- timer card --- */
+.c-timer{grid-column:span 4; display:flex; flex-direction:column;}
+.timer-display{
+  text-align:center;
+  margin:6px 0 16px;
+}
+.timer-num{
+  font-family:var(--serif);
+  font-size:52px;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+  color:var(--cream);
+  line-height:1;
+}
+.timer-mode{
+  margin-top:6px;
+  font-size:10.5px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--amber);
+}
+.timer-ring-wrap{position:relative; width:100%; margin-bottom:8px;}
+.timer-track{
+  width:100%; height:5px; background:var(--bg-3); border-radius:3px; overflow:hidden;
+  border:1px solid var(--line-soft);
+}
+.timer-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--sage), var(--amber));
+  transition: width 1s linear;
+}
+.timer-controls{display:flex; gap:8px; margin-top:14px;}
+.timer-controls button{flex:1;}
+.timer-tabs{display:flex; gap:6px; margin-top:12px;}
+.timer-tabs button{
+  flex:1; font-size:10px; padding:6px; letter-spacing:.06em; text-transform:uppercase;
+}
+.timer-stats{
+  margin-top:14px; padding-top:12px; border-top:1px dashed var(--line);
+  display:flex; justify-content:space-between; font-size:10.5px; color:var(--cream-dimmer);
+}
+.timer-stats b{color:var(--sage); font-family:var(--mono);}
+
+/* --- buttons --- */
+button{
+  font-family:var(--mono);
+  cursor:pointer;
+}
+.btn{
+  background:var(--bg-3);
+  border:1px solid var(--line);
+  color:var(--cream-dim);
+  padding:9px 12px;
+  border-radius:9px;
+  font-size:11.5px;
+  letter-spacing:.03em;
+  transition:.15s;
+}
+.btn:hover{border-color:var(--amber-dim); color:var(--cream); background:var(--bg-2);}
+.btn.primary{background:var(--amber); border-color:var(--amber); color:var(--bg-0); font-weight:700;}
+.btn.primary:hover{background:#f2b856;}
+.btn.ghost{background:none;}
+.btn.danger:hover{border-color:var(--rust); color:var(--rust);}
+.btn.small{padding:5px 9px; font-size:10px;}
+.btn.active{border-color:var(--amber); color:var(--amber);}
+
+/* --- tasks card --- */
+.c-tasks{grid-column:span 4; display:flex; flex-direction:column;}
+.task-input-row{display:flex; gap:6px; margin-bottom:12px;}
+.task-input-row input{
+  flex:1; background:var(--bg-1); border:1px solid var(--line);
+  border-radius:8px; padding:8px 11px; color:var(--cream); font-family:var(--mono); font-size:12px; outline:none;
+}
+.task-input-row input:focus{border-color:var(--amber-dim);}
+.task-list{list-style:none; display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; flex:1;}
+.task-item{
+  display:flex; align-items:center; gap:9px;
+  background:var(--bg-1);
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  padding:9px 10px;
+  font-size:12px;
+}
+.task-check{
+  width:15px; height:15px; border-radius:5px;
+  border:1.5px solid var(--cream-dimmer);
+  flex-shrink:0; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; color:transparent;
+  transition:.15s;
+}
+.task-item.done .task-check{background:var(--sage); border-color:var(--sage); color:var(--bg-0);}
+.task-item.done .task-text{text-decoration:line-through; color:var(--cream-dimmer);}
+.task-text{flex:1; word-break:break-word; cursor:default;}
+.task-del{opacity:0; color:var(--cream-dimmer); font-size:13px; transition:.15s; flex-shrink:0;}
+.task-item:hover .task-del{opacity:1;}
+.task-del:hover{color:var(--rust);}
+.task-empty{color:var(--cream-dimmer); font-size:11.5px; text-align:center; padding:20px 0; font-style:italic;}
+.task-progress{
+  margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);
+  font-size:10.5px; color:var(--cream-dimmer); display:flex; justify-content:space-between;
+}
+
+/* --- notes card --- */
+.c-notes{grid-column:span 4; display:flex; flex-direction:column;}
+.notes-area{
+  flex:1; min-height:200px;
+  background:var(--bg-1);
+  border:1px solid var(--line-soft);
+  border-radius:9px;
+  padding:12px;
+  color:var(--cream);
+  font-family:var(--mono);
+  font-size:12px;
+  line-height:1.6;
+  resize:none;
+  outline:none;
+}
+.notes-area:focus{border-color:var(--amber-dim);}
+.notes-footer{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:8px; font-size:10px; color:var(--cream-dimmer);
+}
+.save-pulse{color:var(--sage); opacity:0; transition:opacity .3s;}
+.save-pulse.show{opacity:1;}
+
+/* --- flashcards --- */
+.c-cards{grid-column:span 7; display:flex; flex-direction:column;}
+.deck-row{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap;}
+.deck-chip{
+  padding:6px 12px; border-radius:20px;
+  background:var(--bg-1); border:1px solid var(--line);
+  font-size:11px; color:var(--cream-dim); cursor:pointer;
+  display:flex; align-items:center; gap:6px;
+}
+.deck-chip.active{border-color:var(--amber); color:var(--amber);}
+.deck-chip .n{opacity:.6; font-size:9.5px;}
+.deck-chip-add{
+  padding:6px 12px; border-radius:20px;
+  background:none; border:1px dashed var(--line);
+  font-size:11px; color:var(--cream-dimmer);
+}
+.card-stage{
+  flex:1; min-height:190px;
+  perspective:1400px;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:12px;
+}
+.flip-card{
+  width:100%; max-width:440px; height:180px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform .5s cubic-bezier(.4,.2,.2,1);
+  cursor:pointer;
+}
+.flip-card.flipped{transform:rotateY(180deg);}
+.flip-face{
+  position:absolute; inset:0;
+  backface-visibility:hidden;
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center;
+  padding:22px;
+  font-family:var(--serif);
+  font-size:18px;
+  line-height:1.4;
+  border:1px solid var(--line);
+}
+.flip-front{background:var(--bg-1); color:var(--cream);}
+.flip-back{
+  background:linear-gradient(155deg, var(--bg-3), var(--bg-1));
+  color:var(--amber);
+  transform:rotateY(180deg);
+  font-style:italic;
+}
+.flip-empty{color:var(--cream-dimmer); font-family:var(--mono); font-size:12px; font-style:italic;}
+.card-nav{display:flex; align-items:center; justify-content:center; gap:14px;}
+.card-count{font-size:11px; color:var(--cream-dimmer); min-width:50px; text-align:center;}
+.card-editor{display:flex; gap:6px; margin-top:12px;}
+.card-editor input{
+  flex:1; background:var(--bg-1); border:1px solid var(--line);
+  border-radius:8px; padding:8px 10px; color:var(--cream); font-family:var(--mono); font-size:11.5px; outline:none;
+}
+.card-editor input:focus{border-color:var(--amber-dim);}
+
+/* --- calc / quote stack --- */
+.c-side{grid-column:span 5; display:flex; flex-direction:column; gap:16px;}
+.c-calc{}
+.calc-screen{
+  background:var(--bg-1); border:1px solid var(--line-soft); border-radius:9px;
+  padding:14px; text-align:right; margin-bottom:10px;
+}
+.calc-expr{font-size:10.5px; color:var(--cream-dimmer); min-height:14px; word-break:break-all;}
+.calc-result{font-family:var(--serif); font-size:26px; color:var(--cream); font-weight:600; margin-top:2px;}
+.calc-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+.calc-grid button{
+  background:var(--bg-1); border:1px solid var(--line-soft); color:var(--cream);
+  border-radius:8px; padding:10px 0; font-size:13px; font-family:var(--mono);
+}
+.calc-grid button:hover{background:var(--bg-3); border-color:var(--amber-dim);}
+.calc-grid button.op{color:var(--amber);}
+.calc-grid button.eq{background:var(--amber); color:var(--bg-0); font-weight:700; grid-column:span 2;}
+.calc-grid button.eq:hover{background:#f2b856;}
+
+.c-quote{
+  background:linear-gradient(155deg, var(--bg-3), var(--bg-2));
+}
+.quote-text{
+  font-family:var(--serif); font-style:italic; font-size:15px; line-height:1.55; color:var(--cream);
+}
+.quote-attr{margin-top:10px; font-size:10.5px; color:var(--amber); letter-spacing:.05em;}
+
+/* --- session / tab manager --- */
+.c-session{grid-column:span 5; display:flex; flex-direction:column;}
+.session-tabs{display:flex; gap:6px; margin-bottom:12px;}
+.session-tabs button{flex:1; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase;}
+.session-list{list-style:none; display:flex; flex-direction:column; gap:6px; max-height:230px; overflow-y:auto; flex:1;}
+.session-item{
+  display:flex; align-items:center; gap:9px;
+  background:var(--bg-1); border:1px solid var(--line-soft); border-radius:8px;
+  padding:9px 10px; font-size:11.5px;
+}
+.session-fav{
+  width:22px; height:22px; border-radius:6px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-weight:700; font-size:10.5px; color:var(--bg-0);
+  background:var(--sage);
+}
+.session-info{flex:1; min-width:0;}
+.session-title{color:var(--cream-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.session-url{color:var(--cream-dimmer); font-size:9.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.session-actions{display:flex; gap:4px; flex-shrink:0;}
+.session-actions span{
+  width:20px; height:20px; border-radius:5px; display:flex; align-items:center; justify-content:center;
+  color:var(--cream-dimmer); font-size:11px; cursor:pointer;
+}
+.session-actions span:hover{background:var(--bg-3); color:var(--amber);}
+.session-empty{color:var(--cream-dimmer); font-size:11.5px; text-align:center; padding:24px 0; font-style:italic;}
+.session-group{
+  background:var(--bg-1); border:1px solid var(--line-soft); border-radius:8px; padding:10px; margin-bottom:8px;
+}
+.session-group-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+.session-group-name{font-size:11.5px; color:var(--cream); font-weight:600;}
+.session-group-count{font-size:9.5px; color:var(--cream-dimmer);}
+.session-footer{display:flex; gap:8px; margin-top:12px;}
+.session-footer button{flex:1;}
+
+/* --- embed panel --- */
+.c-embed{grid-column:span 7; display:flex; flex-direction:column;}
+.embed-input-row{display:flex; gap:6px; margin-bottom:12px;}
+.embed-input-row input{
+  flex:1; background:var(--bg-1); border:1px solid var(--line); border-radius:8px;
+  padding:9px 12px; color:var(--cream); font-family:var(--mono); font-size:12px; outline:none;
+}
+.embed-input-row input:focus{border-color:var(--amber-dim);}
+.embed-stage{
+  width:100%; aspect-ratio:16/9; background:var(--bg-1); border:1px solid var(--line-soft); border-radius:10px;
+  overflow:hidden; display:flex; align-items:center; justify-content:center; margin-bottom:12px;
+}
+.embed-stage iframe{width:100%; height:100%; border:none;}
+.embed-empty{color:var(--cream-dimmer); font-size:12px; font-style:italic; text-align:center; padding:0 20px;}
+.embed-saved{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;}
+.embed-thumb{
+  flex-shrink:0; width:96px; cursor:pointer;
+}
+.embed-thumb img{width:96px; height:54px; object-fit:cover; border-radius:7px; border:1px solid var(--line-soft); display:block;}
+.embed-thumb:hover img{border-color:var(--amber-dim);}
+.embed-thumb .del{font-size:9px; color:var(--cream-dimmer); text-align:center; margin-top:3px;}
+.embed-thumb .del:hover{color:var(--rust);}
+.embed-note{font-size:10px; color:var(--cream-dimmer); margin-top:8px; line-height:1.5;}
+.embed-fallback{
+  display:none; margin-top:8px; font-size:10.5px; color:var(--cream-dimmer);
+  background:var(--bg-1); border:1px solid var(--line-soft); border-radius:8px; padding:8px 10px;
+}
+.embed-fallback a{color:var(--amber); text-decoration:none;}
+.embed-fallback a:hover{text-decoration:underline;}
+
+/* --- bookmarks --- */
+.bookmarks-section{margin-top:16px;}
+
+/* --- focus intention & friction gate --- */
+.intention-row{margin-top:12px;}
+.intention-row input{
+  width:100%; background:var(--bg-1); border:1px solid var(--line-soft); border-radius:8px;
+  padding:8px 10px; color:var(--cream); font-family:var(--mono); font-size:11px; outline:none;
+}
+.intention-row input:focus{border-color:var(--amber-dim);}
+.intention-row input::placeholder{color:var(--cream-dimmer); font-style:italic;}
+.intention-active{
+  margin-top:8px; padding:8px 10px; background:var(--bg-1); border:1px solid var(--sage-dim); border-radius:8px;
+  font-size:10.5px; color:var(--sage); display:flex; align-items:center; gap:7px;
+}
+.intention-active .pulse-dot{width:6px; height:6px; border-radius:50%; background:var(--sage); box-shadow:0 0 6px var(--sage); flex-shrink:0;}
+
+.gate-modal .modal{max-width:380px;}
+.gate-question{font-family:var(--serif); font-size:16px; line-height:1.5; color:var(--cream); margin-bottom:6px;}
+.gate-context{font-size:11px; color:var(--cream-dimmer); margin-bottom:8px;}
+.gate-target{font-size:11px; color:var(--amber); background:var(--bg-1); border:1px solid var(--line-soft); border-radius:7px; padding:8px 10px; margin-bottom:16px; word-break:break-all;}
+.gate-warn{color:var(--rust); font-size:10.5px; margin-bottom:14px;}
+
+/* --- focus allowlist --- */
+.c-allowlist{grid-column:span 12; margin-top:16px;}
+.allowlist-toggle-row{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+.switch{
+  width:38px; height:22px; border-radius:20px; background:var(--bg-1); border:1px solid var(--line);
+  position:relative; cursor:pointer; flex-shrink:0;
+}
+.switch .knob{
+  width:16px; height:16px; border-radius:50%; background:var(--cream-dimmer);
+  position:absolute; top:2px; left:2px; transition:.2s;
+}
+.switch.on{background:var(--sage-dim); border-color:var(--sage);}
+.switch.on .knob{left:18px; background:var(--sage);}
+.allowlist-toggle-label{font-size:11.5px; color:var(--cream-dim);}
+.allowlist-toggle-sub{font-size:10px; color:var(--cream-dimmer); margin-top:2px;}
+.allowlist-row{display:flex; gap:6px; margin-bottom:14px;}
+.allowlist-row input{
+  flex:1; background:var(--bg-1); border:1px solid var(--line); border-radius:8px;
+  padding:9px 12px; color:var(--cream); font-family:var(--mono); font-size:12px; outline:none;
+}
+.allowlist-row input:focus{border-color:var(--amber-dim);}
+.allowlist-chips{display:flex; flex-wrap:wrap; gap:8px;}
+.allowlist-chip{
+  display:flex; align-items:center; gap:8px;
+  background:var(--bg-1); border:1px solid var(--sage-dim); border-radius:20px;
+  padding:6px 8px 6px 14px; font-size:11px; color:var(--cream-dim);
+}
+.allowlist-chip span.x{color:var(--cream-dimmer); cursor:pointer; width:16px; height:16px; display:flex; align-items:center; justify-content:center; border-radius:50%;}
+.allowlist-chip span.x:hover{background:var(--bg-3); color:var(--rust);}
+.allowlist-empty{color:var(--cream-dimmer); font-size:11.5px; font-style:italic;}
+
+.bm-tile.locked{opacity:.45;}
+.bm-tile.locked::after{
+  content:'🔒'; position:absolute; top:6px; left:8px; font-size:9px;
+}
+.bm-tile{position:relative;}
+
+.section-label{
+  display:flex; align-items:center; gap:10px;
+  font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--cream-dimmer);
+  margin-bottom:14px;
+}
+.section-label::after{content:''; flex:1; height:1px; background:var(--line);}
+.bm-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:12px;
+}
+.bm-tile{
+  background:var(--bg-2); border:1px solid var(--line); border-radius:12px;
+  padding:14px 8px 10px; display:flex; flex-direction:column; align-items:center; gap:8px;
+  position:relative; cursor:pointer; transition:.15s;
+}
+.bm-tile:hover{border-color:var(--amber-dim); transform:translateY(-2px);}
+.bm-icon{
+  width:38px; height:38px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-weight:700; font-size:15px; color:var(--bg-0);
+}
+.bm-name{font-size:10.5px; color:var(--cream-dim); text-align:center; word-break:break-word;}
+.bm-del{
+  position:absolute; top:4px; right:6px; font-size:11px; color:var(--cream-dimmer);
+  opacity:0; transition:.15s;
+}
+.bm-tile:hover .bm-del{opacity:1;}
+.bm-del:hover{color:var(--rust);}
+.bm-tile.add-tile{
+  border-style:dashed; color:var(--cream-dimmer); justify-content:center;
+}
+.bm-tile.add-tile:hover{color:var(--amber);}
+
+/* --- footer --- */
+.footer{
+  margin-top:60px;
+  display:flex; justify-content:space-between; align-items:center;
+  padding-top:22px; border-top:1px solid var(--line-soft);
+  font-size:10.5px; color:var(--cream-dimmer);
+  flex-wrap:wrap; gap:14px;
+}
+.footer-left{display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+.privacy-badge{
+  display:flex; align-items:center; gap:7px;
+  color:var(--sage);
+}
+.privacy-badge .dot{width:6px; height:6px; border-radius:50%; background:var(--sage); box-shadow:0 0 8px var(--sage);}
+.footer-clock{font-family:var(--serif); font-size:14px; color:var(--cream-dim);}
+
+/* ============ MODAL ============ */
+.overlay{
+  position:fixed; inset:0; background:rgba(6,7,4,.72);
+  backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center;
+  z-index:100; padding:20px;
+}
+.overlay.show{display:flex;}
+.modal{
+  background:var(--bg-2); border:1px solid var(--line); border-radius:16px;
+  width:100%; max-width:420px; padding:24px;
+  box-shadow:var(--shadow-lg);
+}
+.modal h3{font-family:var(--serif); font-size:18px; margin-bottom:16px; color:var(--cream);}
+.field{margin-bottom:12px;}
+.field label{font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--cream-dimmer); display:block; margin-bottom:6px;}
+.field input{
+  width:100%; background:var(--bg-1); border:1px solid var(--line); border-radius:8px;
+  padding:10px 12px; color:var(--cream); font-family:var(--mono); font-size:12.5px; outline:none;
+}
+.field input:focus{border-color:var(--amber-dim);}
+.modal-actions{display:flex; gap:8px; margin-top:18px; justify-content:flex-end;}
+
+/* ============ COMMAND PALETTE ============ */
+.cmdk{
+  position:fixed; top:14%; left:50%; transform:translateX(-50%);
+  width:100%; max-width:520px;
+  background:var(--bg-2); border:1px solid var(--line); border-radius:14px;
+  box-shadow:var(--shadow-lg);
+  z-index:200; display:none; overflow:hidden;
+}
+.cmdk.show{display:block;}
+.cmdk-input{
+  width:100%; background:var(--bg-1); border:none; border-bottom:1px solid var(--line);
+  padding:16px 18px; color:var(--cream); font-family:var(--mono); font-size:13px; outline:none;
+}
+.cmdk-list{max-height:320px; overflow-y:auto; padding:8px;}
+.cmdk-item{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:8px; font-size:12.5px; color:var(--cream-dim); cursor:pointer;
+}
+.cmdk-item .g{color:var(--amber); font-size:12px; width:16px;}
+.cmdk-item.sel{background:var(--bg-3); color:var(--cream);}
+.cmdk-empty{padding:20px; text-align:center; color:var(--cream-dimmer); font-size:12px;}
+
+/* ============ FOCUS MODE ============ */
+.focus-overlay{
+  position:fixed; inset:0; background:var(--bg-0); z-index:150;
+  display:none; align-items:center; justify-content:center; flex-direction:column;
+}
+.focus-overlay.show{display:flex;}
+.focus-overlay::before{
+  content:''; position:absolute; inset:0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(241,234,217,0.05) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+.focus-timer{font-family:var(--serif); font-size:min(18vw,140px); font-weight:600; color:var(--cream); z-index:2; line-height:1;}
+.focus-label{z-index:2; color:var(--amber); letter-spacing:.2em; text-transform:uppercase; font-size:12px; margin-top:10px;}
+.focus-exit{
+  position:absolute; top:26px; right:26px; z-index:2;
+  color:var(--cream-dimmer); font-size:11px; letter-spacing:.05em;
+}
+.focus-note{z-index:2; margin-top:34px; color:var(--cream-dimmer); font-size:11.5px; font-family:var(--mono);}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--bg-3); border:1px solid var(--amber-dim); color:var(--cream);
+  padding:11px 20px; border-radius:10px; font-size:12px;
+  opacity:0; pointer-events:none; transition:.25s;
+  z-index:300; display:flex; align-items:center; gap:8px;
+  box-shadow:var(--shadow-lg);
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+.toast .g{color:var(--sage);}
+
+@media (max-width: 880px){
+  .c-timer,.c-tasks,.c-notes,.c-cards,.c-side{grid-column:span 12;}
+  .wordmark{font-size:38px;}
+  .navbar{flex-wrap:wrap;}
+  .engine-pick{order:3; width:100%;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ BROWSER CHROME ============ -->
+<div class="chrome">
+  <div class="tabstrip">
+    <div class="tab active"><span class="dot"></span><span>New Tab</span><span class="close">×</span></div>
+    <div class="tab-new" id="tabNewBtn" title="Open a new tab">＋</div>
+  </div>
+  <div class="navbar">
+    <div class="nav-btn" title="Back">←</div>
+    <div class="nav-btn" title="Forward">→</div>
+    <div class="nav-btn" id="refreshBtn" title="Refresh">↻</div>
+    <div class="nav-btn" title="Home">⌂</div>
+    <div class="omnibar">
+      <span class="lock">🔒</span>
+      <input id="omniInput" type="text" placeholder="Search the web, or press Ctrl+K for commands…" autocomplete="off">
+      <div class="engine-pick" id="enginePick">
+        <button data-engine="google" class="active">GOOGLE</button>
+        <button data-engine="ddg">DDG</button>
+        <button data-engine="brave">BRAVE</button>
+        <button data-engine="scholar">SCHOLAR</button>
+        <button data-engine="wiki">WIKI</button>
+      </div>
+    </div>
+    <div class="chrome-right">
+      <div class="icon-btn" id="focusBtn" title="Enter Focus Mode">◎</div>
+      <div class="icon-btn" id="exportBtn" title="Export your data">⇩</div>
+      <div class="icon-btn" title="Menu">⋮</div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <div class="hero">
+    <div class="wordmark">Study<span class="accent">Hub</span></div>
+    <div class="tagline">A private command desk for getting work done</div>
+  </div>
+
+  <div class="search-hero">
+    <div class="box">
+      <span style="color:var(--cream-dimmer); font-size:15px;">⌕</span>
+      <input id="heroSearch" type="text" placeholder="Search anything…" autocomplete="off">
+      <button class="go" id="heroGo">↵</button>
+    </div>
+    <div class="search-meta">
+      <span><kbd>Ctrl</kbd>+<kbd>K</kbd> commands</span>
+      <span><kbd>Ctrl</kbd>+<kbd>Enter</kbd> focus mode</span>
+      <span id="engineNote">via Google</span>
+    </div>
+  </div>
+
+  <div class="bento">
+
+    <!-- TIMER -->
+    <div class="card c-timer">
+      <div class="card-head">
+        <div class="card-title"><span class="glyph">◷</span>Focus Timer</div>
+        <div class="card-sub" id="timerSessions">0 today</div>
+      </div>
+      <div class="timer-display">
+        <div class="timer-num" id="timerNum">25:00</div>
+        <div class="timer-mode" id="timerModeLabel">Ready to work</div>
+      </div>
+      <div class="timer-ring-wrap">
+        <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+      </div>
+      <div class="timer-tabs">
+        <button class="btn small active" data-len="25" id="lenWork">25 · Work</button>
+        <button class="btn small" data-len="5" id="lenShort">5 · Short</button>
+        <button class="btn small" data-len="15" id="lenLong">15 · Long</button>
+      </div>
+      <div class="intention-row">
+        <input id="intentionInput" type="text" placeholder="What are you focusing on this session?" autocomplete="off">
+        <div class="intention-active" id="intentionActive" style="display:none;">
+          <span class="pulse-dot"></span><span id="intentionActiveText"></span>
+        </div>
+      </div>
+      <div class="timer-controls">
+        <button class="btn primary" id="timerStart">Start</button>
+        <button class="btn" id="timerReset">Reset</button>
+      </div>
+      <div class="timer-stats">
+        <span>Focused today: <b id="statMinutes">0m</b></span>
+        <span>Away: <b id="statAway">0m</b></span>
+        <span>Streak: <b id="statStreak">0</b></span>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="card c-tasks">
+      <div class="card-head">
+        <div class="card-title"><span class="glyph">✓</span>Tasks</div>
+        <div class="card-sub" id="taskCountSub">0 open</div>
+      </div>
+      <div class="task-input-row">
+        <input id="taskInput" type="text" placeholder="Add a task and hit enter…" autocomplete="off">
+        <button class="btn primary small" id="taskAddBtn">Add</button>
+      </div>
+      <ul class="task-list" id="taskList"></ul>
+      <div class="task-progress">
+        <span id="taskProgressText">0 of 0 complete</span>
+        <span id="taskProgressPct">0%</span>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="card c-notes">
+      <div class="card-head">
+        <div class="card-title"><span class="glyph">✎</span>Quick Notes</div>
+        <div class="card-sub">local only</div>
+      </div>
+      <textarea class="notes-area" id="notesArea" placeholder="Jot down anything — this stays only on this device…"></textarea>
+      <div class="notes-footer">
+        <span id="notesCount">0 characters</span>
+        <span class="save-pulse" id="savePulse">✓ saved</span>
+      </div>
+    </div>
+
+    <!-- FLASHCARDS -->
+    <div class="card c-cards">
+      <div class="card-head">
+        <div class="card-title"><span class="glyph">▤</span>Flashcards</div>
+        <div class="card-sub">click card to flip · ← → to move</div>
+      </div>
+      <div class="deck-row" id="deckRow"></div>
+      <div class="card-stage" id="cardStage">
+        <div class="flip-card" id="flipCard">
+          <div class="flip-face flip-front" id="flipFront"><span class="flip-empty">No cards yet — add one below</span></div>
+          <div class="flip-face flip-back" id="flipBack"></div>
+        </div>
+      </div>
+      <div class="card-nav">
+        <button class="btn small" id="cardPrev">← Prev</button>
+        <span class="card-count" id="cardCount">0 / 0</span>
+        <button class="btn small" id="cardShuffle">⤮ Shuffle</button>
+        <button class="btn small" id="cardNext">Next →</button>
+      </div>
+      <div class="card-editor">
+        <input id="cardFront" type="text" placeholder="Front (question/term)">
+        <input id="cardBack" type="text" placeholder="Back (answer/definition)">
+        <button class="btn primary small" id="cardAddBtn">＋</button>
+      </div>
+    </div>
+
+    <!-- CALC + QUOTE -->
+    <div class="c-side">
+      <div class="card c-calc">
+        <div class="card-head">
+          <div class="card-title"><span class="glyph">#</span>Calculator</div>
+        </div>
+        <div class="calc-screen">
+          <div class="calc-expr" id="calcExpr">&nbsp;</div>
+          <div class="calc-result" id="calcResult">0</div>
+        </div>
+        <div class="calc-grid" id="calcGrid"></div>
+      </div>
+      <div class="card c-quote">
+        <div class="card-head">
+          <div class="card-title"><span class="glyph">❝</span>Today's Line</div>
+          <div class="icon-btn small" id="quoteNext" style="width:26px;height:26px;font-size:12px;">↻</div>
+        </div>
+        <div class="quote-text" id="quoteText">Loading…</div>
+        <div class="quote-attr" id="quoteAttr"></div>
+      </div>
+    </div>
+
+    <!-- SESSION / TAB MANAGER -->
+    <div class="card c-session">
+      <div class="card-head">
+        <div class="card-title"><span class="glyph">▭</span>Session Tabs</div>
+        <div class="card-sub" id="sessionSub">0 recent</div>
+      </div>
+      <div class="session-tabs">
+        <button class="btn small active" id="sessionTabRecent">Recent</button>
+        <button class="btn small" id="sessionTabSaved">Saved Sessions</button>
+      </div>
+      <ul class="session-list" id="sessionList"></ul>
+      <div class="session-footer">
+        <button class="btn" id="sessionSaveBtn">Save current as session</button>
+        <button class="btn danger" id="sessionClearBtn">Clear</button>
+      </div>
+    </div>
+
+    <!-- EMBED PANEL -->
+    <div class="card c-embed">
+      <div class="card-head">
+        <div class="card-title"><span class="glyph">▶</span>Video Panel</div>
+        <div class="card-sub">official YouTube embed player</div>
+      </div>
+      <div class="embed-input-row">
+        <input id="embedInput" type="text" placeholder="Paste a YouTube link or video ID…" autocomplete="off">
+        <button class="btn primary small" id="embedLoadBtn">Load</button>
+      </div>
+      <div class="embed-stage" id="embedStage">
+        <div class="embed-empty">Paste a link above to load a video here, right in the page.</div>
+      </div>
+      <div class="embed-fallback" id="embedFallback">
+        Video not showing? Some preview windows block embedded players.
+        <a id="embedFallbackLink" href="#" target="_blank" rel="noopener">Open it directly on YouTube ↗</a>
+      </div>
+      <div class="embed-saved" id="embedSaved"></div>
+      <div class="embed-note">Loads through YouTube's own public embed player (youtube-nocookie.com) — the same one every site uses. Nothing is proxied or disguised.</div>
+    </div>
+
+  </div>
+
+  <div class="card c-allowlist">
+    <div class="card-head">
+      <div class="card-title"><span class="glyph">⛊</span>Focus Allowlist</div>
+      <div class="card-sub">interrupts distractions during work sessions</div>
+    </div>
+    <div class="allowlist-toggle-row">
+      <div class="switch" id="allowlistSwitch"><div class="knob"></div></div>
+      <div>
+        <div class="allowlist-toggle-label">Enforce allowlist during active work sessions</div>
+        <div class="allowlist-toggle-sub">While your timer is running in Work mode, anything not on this list — or without a stated intention — will pause and ask you first. Nothing is ever blocked outright; you always stay in control.</div>
+      </div>
+    </div>
+    <div class="allowlist-row">
+      <input id="allowlistName" type="text" placeholder="Label (e.g. Google Docs)">
+      <input id="allowlistDomain" type="text" placeholder="Domain (e.g. docs.google.com)">
+      <button class="btn primary small" id="allowlistAddBtn">Add</button>
+    </div>
+    <div class="allowlist-chips" id="allowlistChips"></div>
+  </div>
+
+  <div class="bookmarks-section">
+    <div class="section-label">Bookmarks</div>
+    <div class="bm-grid" id="bmGrid"></div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">
+      <div class="privacy-badge"><span class="dot"></span>100% local — nothing leaves this device</div>
+      <span id="dateDisplay"></span>
+    </div>
+    <div class="footer-clock" id="clockDisplay">--:--:--</div>
+  </div>
+
+</main>
+
+<!-- MODAL: add bookmark -->
+<div class="overlay" id="bmOverlay">
+  <div class="modal">
+    <h3>New Bookmark</h3>
+    <div class="field"><label>Name</label><input id="bmName" type="text" placeholder="Khan Academy"></div>
+    <div class="field"><label>URL</label><input id="bmUrl" type="text" placeholder="https://khanacademy.org"></div>
+    <div class="modal-actions">
+      <button class="btn" id="bmCancel">Cancel</button>
+      <button class="btn primary" id="bmSave">Add Bookmark</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: add deck -->
+<div class="overlay" id="deckOverlay">
+  <div class="modal">
+    <h3>New Deck</h3>
+    <div class="field"><label>Deck name</label><input id="deckName" type="text" placeholder="Biology — Chapter 4"></div>
+    <div class="modal-actions">
+      <button class="btn" id="deckCancel">Cancel</button>
+      <button class="btn primary" id="deckSave">Create Deck</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: focus friction gate -->
+<div class="overlay gate-modal" id="gateOverlay">
+  <div class="modal">
+    <h3>Quick check</h3>
+    <div class="gate-question" id="gateQuestion">Is this part of what you're working on?</div>
+    <div class="gate-context" id="gateContext"></div>
+    <div class="gate-target" id="gateTarget"></div>
+    <div class="gate-warn" id="gateWarn" style="display:none;"></div>
+    <div class="modal-actions">
+      <button class="btn" id="gateCancel">Stay focused</button>
+      <button class="btn primary" id="gateProceed">Yes, open it</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- COMMAND PALETTE -->
+<div class="cmdk" id="cmdk">
+  <input class="cmdk-input" id="cmdkInput" placeholder="Type a command…" autocomplete="off">
+  <div class="cmdk-list" id="cmdkList"></div>
+</div>
+
+<!-- FOCUS MODE -->
+<div class="focus-overlay" id="focusOverlay">
+  <div class="focus-exit" id="focusExit">ESC to exit</div>
+  <div class="focus-timer" id="focusTimerNum">25:00</div>
+  <div class="focus-label" id="focusLabel">WORK SESSION</div>
+  <div class="focus-note">One tab. One task. Go.</div>
+</div>
+
+<div class="toast" id="toast"><span class="g">●</span><span id="toastMsg"></span></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   STORAGE LAYER — everything below is 100% localStorage.
+   No network calls are made except the search bar itself,
+   which opens the chosen search engine exactly like a normal
+   browser would. Nothing is transmitted, tracked, or synced.
+============================================================ */
+const DB = {
+  get(key, fallback){
+    try{
+      const raw = localStorage.getItem('studyhub_'+key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  },
+  set(key, val){
+    try{ localStorage.setItem('studyhub_'+key, JSON.stringify(val)); }catch(e){}
+  }
+};
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   CLOCK
+============================================================ */
+function tickClock(){
+  const now = new Date();
+  document.getElementById('clockDisplay').textContent = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  document.getElementById('dateDisplay').textContent = now.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'});
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+/* ============================================================
+   SEARCH BAR (real, functional, multi-engine)
+============================================================ */
+const ENGINES = {
+  google: {label:'Google', url:'https://www.google.com/search?q='},
+  ddg:    {label:'DuckDuckGo', url:'https://duckduckgo.com/?q='},
+  brave:  {label:'Brave', url:'https://search.brave.com/search?q='},
+  scholar:{label:'Google Scholar', url:'https://scholar.google.com/scholar?q='},
+  wiki:   {label:'Wikipedia', url:'https://en.wikipedia.org/w/index.php?search='}
+};
+let currentEngine = DB.get('engine', 'google');
+
+function paintEngine(){
+  document.querySelectorAll('.engine-pick button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.engine === currentEngine);
+  });
+  document.getElementById('engineNote').textContent = 'via ' + ENGINES[currentEngine].label;
+}
+paintEngine();
+
+document.getElementById('enginePick').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentEngine = btn.dataset.engine;
+  DB.set('engine', currentEngine);
+  paintEngine();
+});
+
+function runSearch(q){
+  q = q.trim();
+  if(!q) return;
+  let url, title;
+  if(/^https?:\/\//i.test(q)){
+    url = q; title = q.replace(/^https?:\/\//,'').split('/')[0];
+  } else if(/^[a-z0-9-]+\.[a-z]{2,}(\/.*)?$/i.test(q) && !q.includes(' ')){
+    url = 'https://' + q; title = q;
+  } else {
+    url = ENGINES[currentEngine].url + encodeURIComponent(q);
+    title = q + ' — ' + ENGINES[currentEngine].label;
+  }
+  FocusGate.check(title, url, ()=>{
+    window.open(url, '_blank', 'noopener');
+    Session.log(title, url);
+  });
+}
+
+document.getElementById('heroGo').addEventListener('click', ()=> runSearch(document.getElementById('heroSearch').value));
+document.getElementById('heroSearch').addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(e.target.value); });
+document.getElementById('omniInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(e.target.value); });
+document.getElementById('refreshBtn').addEventListener('click', ()=> location.reload());
+document.getElementById('tabNewBtn').addEventListener('click', ()=>{
+  const url = 'https://amazingtt.krepche.com/';
+  window.open(url, '_blank', 'noopener');
+  Session.log('StudyHub', url);
+});
+
+/* ============================================================
+   POMODORO TIMER
+============================================================ */
+const Timer = {
+  lengths: {work:25, short:5, long:15},
+  mode: 'work',
+  remaining: 25*60,
+  total: 25*60,
+  running: false,
+  intervalId: null,
+
+  init(){
+    const stats = DB.get('timerStats', {date:'', minutes:0, sessions:0, streak:0, lastDate:'', awayMs:0});
+    const today = new Date().toDateString();
+    if(stats.date !== today){ stats.minutes = 0; stats.sessions = 0; stats.awayMs = 0; stats.date = today; }
+    if(stats.awayMs === undefined) stats.awayMs = 0;
+    this.stats = stats;
+    this.paintStats();
+    this.paintDisplay();
+    this.paintIntentionState();
+
+    const intentionInput = document.getElementById('intentionInput');
+    intentionInput.value = DB.get('intention', '');
+    intentionInput.addEventListener('input', ()=> DB.set('intention', intentionInput.value));
+
+    document.getElementById('timerStart').addEventListener('click', ()=> this.toggle());
+    document.getElementById('timerReset').addEventListener('click', ()=> this.reset());
+    document.getElementById('lenWork').addEventListener('click', ()=> this.setMode('work'));
+    document.getElementById('lenShort').addEventListener('click', ()=> this.setMode('short'));
+    document.getElementById('lenLong').addEventListener('click', ()=> this.setMode('long'));
+
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden){
+        this._hiddenAt = Date.now();
+      } else if(this._hiddenAt && this.running && this.mode==='work'){
+        const away = Date.now() - this._hiddenAt;
+        this._hiddenAt = null;
+        if(away > 60000){
+          this.stats.awayMs += away;
+          DB.set('timerStats', this.stats);
+          this.paintStats();
+          toast('Welcome back — away ' + Math.round(away/60000) + 'm during "' + (DB.get('intention','') || 'your focus session') + '"');
+        }
+      }
+    });
+  },
+
+  paintIntentionState(){
+    const input = document.getElementById('intentionInput');
+    const banner = document.getElementById('intentionActive');
+    const bannerText = document.getElementById('intentionActiveText');
+    const active = this.running && this.mode==='work';
+    input.style.display = active ? 'none' : 'block';
+    banner.style.display = active ? 'flex' : 'none';
+    if(active) bannerText.textContent = 'Focused on: ' + (DB.get('intention','').trim() || 'this work session');
+  },
+
+  setMode(mode){
+    this.mode = mode;
+    this.total = this.lengths[mode]*60;
+    this.remaining = this.total;
+    this.running = false;
+    clearInterval(this.intervalId);
+    document.getElementById('timerStart').textContent = 'Start';
+    ['lenWork','lenShort','lenLong'].forEach(id=>document.getElementById(id).classList.remove('active'));
+    document.getElementById('len'+mode.charAt(0).toUpperCase()+mode.slice(1)).classList.add('active');
+    this.paintDisplay();
+    this.paintIntentionState();
+  },
+
+  toggle(){
+    this.running = !this.running;
+    document.getElementById('timerStart').textContent = this.running ? 'Pause' : 'Resume';
+    if(this.running){
+      this.intervalId = setInterval(()=> this.tick(), 1000);
+    } else {
+      clearInterval(this.intervalId);
+    }
+    this.paintIntentionState();
+  },
+
+  tick(){
+    this.remaining--;
+    if(this.mode === 'work'){
+      this.stats.minutes += 1/60;
+      DB.set('timerStats', this.stats);
+    }
+    if(this.remaining <= 0){
+      this.complete();
+      return;
+    }
+    this.paintDisplay();
+  },
+
+  complete(){
+    clearInterval(this.intervalId);
+    this.running = false;
+    beep();
+    if(this.mode === 'work'){
+      this.stats.sessions += 1;
+      this.stats.streak += 1;
+      DB.set('timerStats', this.stats);
+      toast('Session complete — take a break 🌿');
+    } else {
+      toast('Break over — back to it.');
+    }
+    this.paintStats();
+    this.remaining = this.total;
+    document.getElementById('timerStart').textContent = 'Start';
+    this.paintDisplay();
+    this.paintIntentionState();
+  },
+
+  reset(){
+    clearInterval(this.intervalId);
+    this.running = false;
+    this.remaining = this.total;
+    document.getElementById('timerStart').textContent = 'Start';
+    this.paintDisplay();
+    this.paintIntentionState();
+  },
+
+  paintDisplay(){
+    const m = Math.floor(this.remaining/60);
+    const s = this.remaining%60;
+    const str = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    document.getElementById('timerNum').textContent = str;
+    document.getElementById('focusTimerNum').textContent = str;
+    const label = this.mode==='work' ? 'Work session' : (this.mode==='short' ? 'Short break' : 'Long break');
+    document.getElementById('timerModeLabel').textContent = this.running ? label + ' — running' : label;
+    document.getElementById('focusLabel').textContent = label.toUpperCase();
+    const pct = 100 - (this.remaining/this.total*100);
+    document.getElementById('timerFill').style.width = pct + '%';
+  },
+
+  paintStats(){
+    document.getElementById('statMinutes').textContent = Math.round(this.stats.minutes) + 'm';
+    document.getElementById('statAway').textContent = Math.round(this.stats.awayMs/60000) + 'm';
+    document.getElementById('statStreak').textContent = this.stats.streak;
+    document.getElementById('timerSessions').textContent = this.stats.sessions + ' today';
+  }
+};
+Timer.init();
+
+// Web Audio beep — no external sound file needed
+function beep(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine'; o.frequency.value = 660;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.5);
+    o.start(); o.stop(ctx.currentTime+0.55);
+  }catch(e){}
+}
+
+/* ============================================================
+   TASKS
+============================================================ */
+const Tasks = {
+  items: DB.get('tasks', []),
+
+  init(){
+    this.render();
+    document.getElementById('taskAddBtn').addEventListener('click', ()=> this.add());
+    document.getElementById('taskInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') this.add(); });
+  },
+  add(){
+    const inp = document.getElementById('taskInput');
+    const text = inp.value.trim();
+    if(!text) return;
+    this.items.push({id: Date.now(), text, done:false});
+    inp.value = '';
+    this.save();
+  },
+  toggle(id){
+    const t = this.items.find(x=>x.id===id);
+    if(t) t.done = !t.done;
+    this.save();
+  },
+  remove(id){
+    this.items = this.items.filter(x=>x.id!==id);
+    this.save();
+  },
+  save(){
+    DB.set('tasks', this.items);
+    this.render();
+  },
+  render(){
+    const list = document.getElementById('taskList');
+    list.innerHTML = '';
+    if(this.items.length === 0){
+      list.innerHTML = '<div class="task-empty">Nothing on your list yet</div>';
+    }
+    this.items.forEach(t=>{
+      const li = document.createElement('li');
+      li.className = 'task-item' + (t.done ? ' done' : '');
+      li.innerHTML = `<span class="task-check">${t.done?'✓':''}</span><span class="task-text"></span><span class="task-del">✕</span>`;
+      li.querySelector('.task-text').textContent = t.text;
+      li.querySelector('.task-check').addEventListener('click', ()=> this.toggle(t.id));
+      li.querySelector('.task-del').addEventListener('click', ()=> this.remove(t.id));
+      list.appendChild(li);
+    });
+    const done = this.items.filter(x=>x.done).length;
+    const total = this.items.length;
+    document.getElementById('taskCountSub').textContent = (total-done) + ' open';
+    document.getElementById('taskProgressText').textContent = done + ' of ' + total + ' complete';
+    document.getElementById('taskProgressPct').textContent = (total ? Math.round(done/total*100) : 0) + '%';
+  }
+};
+Tasks.init();
+
+/* ============================================================
+   NOTES (debounced autosave)
+============================================================ */
+const Notes = {
+  init(){
+    const area = document.getElementById('notesArea');
+    area.value = DB.get('notes', '');
+    this.updateCount();
+    let debounceId;
+    area.addEventListener('input', ()=>{
+      this.updateCount();
+      clearTimeout(debounceId);
+      debounceId = setTimeout(()=>{
+        DB.set('notes', area.value);
+        const pulse = document.getElementById('savePulse');
+        pulse.classList.add('show');
+        setTimeout(()=>pulse.classList.remove('show'), 900);
+      }, 500);
+    });
+  },
+  updateCount(){
+    document.getElementById('notesCount').textContent = document.getElementById('notesArea').value.length + ' characters';
+  }
+};
+Notes.init();
+
+/* ============================================================
+   FLASHCARDS
+============================================================ */
+const Cards = {
+  decks: DB.get('decks', [
+    {id:1, name:'Sample Deck', cards:[
+      {front:'Mitochondria', back:'The powerhouse of the cell'},
+      {front:'Photosynthesis', back:'Process plants use to convert light into chemical energy'}
+    ]}
+  ]),
+  activeDeck: DB.get('activeDeck', 1),
+  index: 0,
+  flipped: false,
+
+  init(){
+    this.renderDecks();
+    this.renderCard();
+    document.getElementById('flipCard').addEventListener('click', ()=> this.flip());
+    document.getElementById('cardPrev').addEventListener('click', ()=> this.move(-1));
+    document.getElementById('cardNext').addEventListener('click', ()=> this.move(1));
+    document.getElementById('cardShuffle').addEventListener('click', ()=> this.shuffle());
+    document.getElementById('cardAddBtn').addEventListener('click', ()=> this.addCard());
+    document.addEventListener('keydown', (e)=>{
+      if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+      if(e.key === 'ArrowLeft') this.move(-1);
+      if(e.key === 'ArrowRight') this.move(1);
+      if(e.key === ' ' && document.getElementById('cardStage').contains(document.activeElement) === false){ /* handled by click */ }
+    });
+  },
+
+  getDeck(){ return this.decks.find(d=>d.id===this.activeDeck) || this.decks[0]; },
+
+  renderDecks(){
+    const row = document.getElementById('deckRow');
+    row.innerHTML = '';
+    this.decks.forEach(d=>{
+      const chip = document.createElement('div');
+      chip.className = 'deck-chip' + (d.id===this.activeDeck ? ' active' : '');
+      chip.innerHTML = `<span></span><span class="n">${d.cards.length}</span>`;
+      chip.querySelector('span').textContent = d.name;
+      chip.addEventListener('click', ()=>{
+        this.activeDeck = d.id;
+        DB.set('activeDeck', this.activeDeck);
+        this.index = 0; this.flipped = false;
+        this.renderDecks(); this.renderCard();
+      });
+      row.appendChild(chip);
+    });
+    const addChip = document.createElement('div');
+    addChip.className = 'deck-chip-add';
+    addChip.textContent = '＋ New Deck';
+    addChip.addEventListener('click', ()=> openDeckModal());
+    row.appendChild(addChip);
+  },
+
+  renderCard(){
+    const deck = this.getDeck();
+    const front = document.getElementById('flipFront');
+    const back = document.getElementById('flipBack');
+    const flip = document.getElementById('flipCard');
+    flip.classList.remove('flipped');
+    this.flipped = false;
+    if(!deck || deck.cards.length === 0){
+      front.innerHTML = '<span class="flip-empty">No cards yet — add one below</span>';
+      back.textContent = '';
+      document.getElementById('cardCount').textContent = '0 / 0';
+      return;
+    }
+    if(this.index >= deck.cards.length) this.index = 0;
+    const c = deck.cards[this.index];
+    front.textContent = c.front;
+    back.textContent = c.back;
+    document.getElementById('cardCount').textContent = (this.index+1) + ' / ' + deck.cards.length;
+  },
+
+  flip(){
+    document.getElementById('flipCard').classList.toggle('flipped');
+    this.flipped = !this.flipped;
+  },
+
+  move(dir){
+    const deck = this.getDeck();
+    if(!deck || deck.cards.length===0) return;
+    this.index = (this.index + dir + deck.cards.length) % deck.cards.length;
+    this.renderCard();
+  },
+
+  shuffle(){
+    const deck = this.getDeck();
+    if(!deck) return;
+    for(let i=deck.cards.length-1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [deck.cards[i], deck.cards[j]] = [deck.cards[j], deck.cards[i]];
+    }
+    this.index = 0;
+    this.save();
+    toast('Deck shuffled');
+  },
+
+  addCard(){
+    const f = document.getElementById('cardFront');
+    const b = document.getElementById('cardBack');
+    if(!f.value.trim() || !b.value.trim()) return;
+    const deck = this.getDeck();
+    deck.cards.push({front:f.value.trim(), back:b.value.trim()});
+    f.value=''; b.value='';
+    this.index = deck.cards.length-1;
+    this.save();
+    toast('Card added');
+  },
+
+  addDeck(name){
+    const id = Date.now();
+    this.decks.push({id, name, cards:[]});
+    this.activeDeck = id;
+    this.index = 0;
+    DB.set('activeDeck', id);
+    this.save();
+    this.renderDecks();
+  },
+
+  save(){
+    DB.set('decks', this.decks);
+    this.renderDecks();
+    this.renderCard();
+  }
+};
+Cards.init();
+
+function openDeckModal(){
+  document.getElementById('deckOverlay').classList.add('show');
+  document.getElementById('deckName').focus();
+}
+document.getElementById('deckCancel').addEventListener('click', ()=> document.getElementById('deckOverlay').classList.remove('show'));
+document.getElementById('deckSave').addEventListener('click', ()=>{
+  const name = document.getElementById('deckName').value.trim();
+  if(!name) return;
+  Cards.addDeck(name);
+  document.getElementById('deckName').value = '';
+  document.getElementById('deckOverlay').classList.remove('show');
+  toast('Deck created');
+});
+
+/* ============================================================
+   CALCULATOR (safe — no eval on arbitrary strings)
+============================================================ */
+const Calc = {
+  expr: '',
+
+  init(){
+    const grid = document.getElementById('calcGrid');
+    const rows = [
+      ['7','8','9','÷'],
+      ['4','5','6','×'],
+      ['1','2','3','−'],
+      ['C','0','.','+'],
+      ['%','⌫','=','=']
+    ];
+    grid.innerHTML = '';
+    rows.forEach(r=>{
+      r.forEach(k=>{
+        const btn = document.createElement('button');
+        btn.textContent = k;
+        if(['÷','×','−','+','%'].includes(k)) btn.className = 'op';
+        if(k==='='){ btn.className='eq'; }
+        btn.addEventListener('click', ()=> this.press(k, btn));
+        grid.appendChild(btn);
+      });
+    });
+    // merge the two '=' cells into one spanning button visually handled by CSS grid-column span on .eq
+    this.updateScreen();
+  },
+
+  press(k){
+    if(k==='C'){ this.expr=''; }
+    else if(k==='⌫'){ this.expr = this.expr.slice(0,-1); }
+    else if(k==='='){ this.evaluate(); return; }
+    else {
+      const map = {'÷':'/','×':'*','−':'-','%':'%'};
+      this.expr += map[k] || k;
+    }
+    this.updateScreen();
+  },
+
+  evaluate(){
+    const safe = this.expr.replace(/[^0-9+\-*/.%() ]/g,'');
+    if(!safe){ return; }
+    try{
+      // Token-validated arithmetic only — no function calls, no identifiers.
+      const result = Function('"use strict"; return (' + safe + ')')();
+      if(typeof result !== 'number' || !isFinite(result)) throw new Error('bad');
+      document.getElementById('calcExpr').textContent = this.expr;
+      document.getElementById('calcResult').textContent = Number(result.toFixed(8)).toString();
+      this.expr = String(result);
+    }catch(e){
+      document.getElementById('calcResult').textContent = 'Error';
+      this.expr = '';
+    }
+  },
+
+  updateScreen(){
+    document.getElementById('calcExpr').textContent = this.expr || '\u00A0';
+    if(this.expr){
+      document.getElementById('calcResult').textContent = this.expr;
+    }
+  }
+};
+Calc.init();
+
+/* ============================================================
+   QUOTES (original lines, no copyrighted material)
+============================================================ */
+const QUOTES = [
+  {t:"Small work, repeated daily, outperforms big work attempted once.", a:"— desk note"},
+  {t:"Start before you feel ready. Readiness is a myth clarity fixes later.", a:"— desk note"},
+  {t:"A cluttered tab list is a cluttered mind wearing a browser costume.", a:"— desk note"},
+  {t:"The goal isn't to finish everything today. It's to move the one thing that matters.", a:"— desk note"},
+  {t:"Focus is just attention with the door closed.", a:"— desk note"},
+  {t:"Progress hides inside boring, repeatable sessions.", a:"— desk note"},
+  {t:"You don't need more time. You need one less tab open.", a:"— desk note"},
+  {t:"Done today beats perfect someday.", a:"— desk note"}
+];
+function paintQuote(){
+  const idx = DB.get('quoteIdx', 0) % QUOTES.length;
+  const q = QUOTES[idx];
+  document.getElementById('quoteText').textContent = '"' + q.t + '"';
+  document.getElementById('quoteAttr').textContent = q.a;
+}
+paintQuote();
+document.getElementById('quoteNext').addEventListener('click', ()=>{
+  const idx = (DB.get('quoteIdx',0)+1) % QUOTES.length;
+  DB.set('quoteIdx', idx);
+  paintQuote();
+});
+// rotate daily by default
+(function(){
+  const lastDay = DB.get('quoteDay','');
+  const today = new Date().toDateString();
+  if(lastDay !== today){
+    DB.set('quoteDay', today);
+    DB.set('quoteIdx', Math.floor(Math.random()*QUOTES.length));
+    paintQuote();
+  }
+})();
+
+/* ============================================================
+   BOOKMARKS
+============================================================ */
+const Bookmarks = {
+  items: DB.get('bookmarks', [
+    {name:'Wikipedia', url:'https://en.wikipedia.org', color:'#8fae8b'},
+    {name:'Khan Academy', url:'https://khanacademy.org', color:'#e8a33d'},
+    {name:'Google Scholar', url:'https://scholar.google.com', color:'#c1573a'},
+    {name:'Quizlet', url:'https://quizlet.com', color:'#6b8fd6'},
+    {name:'WolframAlpha', url:'https://wolframalpha.com', color:'#d6a56b'}
+  ]),
+
+  init(){ this.render(); },
+
+  add(name, url){
+    if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    const palette = ['#e8a33d','#8fae8b','#c1573a','#6b8fd6','#b98ad6','#d6a56b'];
+    const color = palette[this.items.length % palette.length];
+    this.items.push({name, url, color});
+    this.save();
+  },
+  remove(i){
+    this.items.splice(i,1);
+    this.save();
+  },
+  save(){
+    DB.set('bookmarks', this.items);
+    this.render();
+  },
+  render(){
+    const grid = document.getElementById('bmGrid');
+    grid.innerHTML = '';
+    this.items.forEach((b, i)=>{
+      const tile = document.createElement('div');
+      const locked = Allowlist.isLocked(b.url);
+      tile.className = 'bm-tile' + (locked ? ' locked' : '');
+      const initial = b.name.trim().charAt(0).toUpperCase() || '?';
+      tile.innerHTML = `<span class="bm-del">✕</span><div class="bm-icon" style="background:${b.color}">${initial}</div><div class="bm-name"></div>`;
+      tile.querySelector('.bm-name').textContent = b.name;
+      tile.addEventListener('click', (e)=>{
+        if(e.target.classList.contains('bm-del')) return;
+        FocusGate.check(b.name, b.url, ()=>{
+          window.open(b.url, '_blank', 'noopener');
+          Session.log(b.name, b.url);
+        });
+      });
+      tile.querySelector('.bm-del').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        Bookmarks.remove(i);
+      });
+      grid.appendChild(tile);
+    });
+    const addTile = document.createElement('div');
+    addTile.className = 'bm-tile add-tile';
+    addTile.innerHTML = `<div style="font-size:20px;">＋</div><div class="bm-name">Add</div>`;
+    addTile.addEventListener('click', ()=> openBmModal());
+    grid.appendChild(addTile);
+  }
+};
+
+/* ============================================================
+   FOCUS ALLOWLIST
+   Purely a self-accountability nudge: while a Work session is
+   running, opening something not on this list (or with no
+   stated intention) pauses for a one-click check-in. Nothing is
+   blocked — you can always choose "open it anyway."
+============================================================ */
+const Allowlist = {
+  items: DB.get('allowlist', []),
+  enforced: DB.get('allowlistEnforced', false),
+
+  init(){
+    this.paintSwitch();
+    this.render();
+    document.getElementById('allowlistSwitch').addEventListener('click', ()=>{
+      this.enforced = !this.enforced;
+      DB.set('allowlistEnforced', this.enforced);
+      this.paintSwitch();
+      Bookmarks.render();
+    });
+    document.getElementById('allowlistAddBtn').addEventListener('click', ()=> this.add());
+    document.getElementById('allowlistDomain').addEventListener('keydown', (e)=>{ if(e.key==='Enter') this.add(); });
+  },
+
+  paintSwitch(){
+    document.getElementById('allowlistSwitch').classList.toggle('on', this.enforced);
+  },
+
+  add(){
+    const nameEl = document.getElementById('allowlistName');
+    const domainEl = document.getElementById('allowlistDomain');
+    const name = nameEl.value.trim();
+    let domain = domainEl.value.trim().toLowerCase().replace(/^https?:\/\//,'').split('/')[0];
+    if(!name || !domain) return;
+    this.items.push({name, domain});
+    DB.set('allowlist', this.items);
+    nameEl.value=''; domainEl.value='';
+    this.render();
+    Bookmarks.render();
+  },
+
+  remove(i){
+    this.items.splice(i,1);
+    DB.set('allowlist', this.items);
+    this.render();
+    Bookmarks.render();
+  },
+
+  matches(url){
+    try{
+      const host = new URL(url).hostname.toLowerCase();
+      return this.items.some(a => host.includes(a.domain));
+    }catch(e){ return false; }
+  },
+
+  isLocked(url){
+    if(!this.enforced || this.items.length===0) return false;
+    if(!(Timer.running && Timer.mode==='work')) return false;
+    return !this.matches(url);
+  },
+
+  render(){
+    const wrap = document.getElementById('allowlistChips');
+    wrap.innerHTML = '';
+    if(this.items.length===0){
+      wrap.innerHTML = '<div class="allowlist-empty">No sites added yet — add the 2–3 things you actually need for this session.</div>';
+      return;
+    }
+    this.items.forEach((a,i)=>{
+      const chip = document.createElement('div');
+      chip.className = 'allowlist-chip';
+      chip.innerHTML = `<span></span><span class="x">✕</span>`;
+      chip.querySelector('span').textContent = a.name + ' · ' + a.domain;
+      chip.querySelector('.x').addEventListener('click', ()=> Allowlist.remove(i));
+      wrap.appendChild(chip);
+    });
+  }
+};
+Allowlist.init();
+Bookmarks.init();
+
+/* ============================================================
+   FOCUS GATE
+   The friction check itself. Only ever intervenes while an
+   active Work session is running — never during breaks or when
+   idle. It never silently blocks anything; "open it anyway" is
+   always one click away.
+============================================================ */
+const FocusGate = {
+  check(title, url, onProceed){
+    const sessionActive = Timer.running && Timer.mode === 'work';
+    if(!sessionActive){ onProceed(); return; }
+
+    const locked = Allowlist.isLocked(url);
+    const intention = DB.get('intention','').trim();
+
+    // If there's no allowlist restriction in play and the user has stated
+    // an intention, don't interrupt — let them work.
+    if(!locked && intention){ onProceed(); return; }
+    // If there's no allowlist AND no intention, only ask occasionally
+    // rather than gating every single click (avoid nagging).
+    if(!locked && !intention){ onProceed(); return; }
+
+    document.getElementById('gateQuestion').textContent = locked
+      ? "That's not on your focus allowlist."
+      : "Quick check before you go —";
+    document.getElementById('gateContext').textContent = intention
+      ? 'Your stated focus: "' + intention + '"'
+      : "You haven't set a focus for this session.";
+    document.getElementById('gateTarget').textContent = title;
+    const warn = document.getElementById('gateWarn');
+    if(locked){ warn.style.display='block'; warn.textContent = 'This session is restricted to your allowlist.'; }
+    else { warn.style.display='none'; }
+
+    const overlay = document.getElementById('gateOverlay');
+    overlay.classList.add('show');
+
+    const proceedBtn = document.getElementById('gateProceed');
+    const cancelBtn = document.getElementById('gateCancel');
+    const cleanup = ()=>{
+      overlay.classList.remove('show');
+      proceedBtn.removeEventListener('click', onYes);
+      cancelBtn.removeEventListener('click', onNo);
+    };
+    const onYes = ()=>{ cleanup(); onProceed(); };
+    const onNo = ()=>{ cleanup(); toast('Stayed on task 🌿'); };
+    proceedBtn.addEventListener('click', onYes);
+    cancelBtn.addEventListener('click', onNo);
+  }
+};
+document.getElementById('gateOverlay').addEventListener('click', (e)=>{ if(e.target.id==='gateOverlay') e.currentTarget.classList.remove('show'); });
+
+
+function openBmModal(){
+  document.getElementById('bmOverlay').classList.add('show');
+  document.getElementById('bmName').focus();
+}
+document.getElementById('bmCancel').addEventListener('click', ()=> document.getElementById('bmOverlay').classList.remove('show'));
+document.getElementById('bmSave').addEventListener('click', ()=>{
+  const name = document.getElementById('bmName').value.trim();
+  const url = document.getElementById('bmUrl').value.trim();
+  if(!name || !url) return;
+  Bookmarks.add(name, url);
+  document.getElementById('bmName').value = '';
+  document.getElementById('bmUrl').value = '';
+  document.getElementById('bmOverlay').classList.remove('show');
+  toast('Bookmark added');
+});
+
+/* ============================================================
+   SESSION / TAB MANAGER
+   Tracks links opened from this page (search + bookmarks) so you
+   can group them into named "sessions" and reopen them together.
+   This does not and cannot see your browser's actual open tabs —
+   browsers don't expose that to any page, by design. It only
+   remembers what you opened from here.
+============================================================ */
+const Session = {
+  history: DB.get('sessionHistory', []),
+  sessions: DB.get('savedSessions', []),
+  view: 'recent',
+
+  init(){
+    this.render();
+    document.getElementById('sessionTabRecent').addEventListener('click', ()=>{ this.view='recent'; this.paintTabs(); this.render(); });
+    document.getElementById('sessionTabSaved').addEventListener('click', ()=>{ this.view='saved'; this.paintTabs(); this.render(); });
+    document.getElementById('sessionSaveBtn').addEventListener('click', ()=> this.saveCurrent());
+    document.getElementById('sessionClearBtn').addEventListener('click', ()=>{
+      if(this.view==='recent'){ this.history=[]; DB.set('sessionHistory', this.history); }
+      else { this.sessions=[]; DB.set('savedSessions', this.sessions); }
+      this.render();
+    });
+  },
+
+  paintTabs(){
+    document.getElementById('sessionTabRecent').classList.toggle('active', this.view==='recent');
+    document.getElementById('sessionTabSaved').classList.toggle('active', this.view==='saved');
+  },
+
+  log(title, url){
+    this.history = this.history.filter(h=>h.url!==url);
+    this.history.unshift({title: title||url, url, ts: Date.now()});
+    if(this.history.length > 25) this.history.length = 25;
+    DB.set('sessionHistory', this.history);
+    if(this.view==='recent') this.render();
+  },
+
+  saveCurrent(){
+    if(this.history.length===0){ toast('Nothing recent to save yet'); return; }
+    const name = prompt('Name this session (e.g. "Bio essay research"):', '');
+    if(!name || !name.trim()) return;
+    this.sessions.unshift({id: Date.now(), name: name.trim(), items: this.history.slice(0, 12)});
+    DB.set('savedSessions', this.sessions);
+    toast('Session saved');
+    this.view = 'saved';
+    this.paintTabs();
+    this.render();
+  },
+
+  openAll(items){
+    items.forEach((it,i)=> setTimeout(()=> window.open(it.url, '_blank', 'noopener'), i*120));
+    toast('Opening ' + items.length + ' tab(s) — allow popups if blocked');
+  },
+
+  removeHistory(url){
+    this.history = this.history.filter(h=>h.url!==url);
+    DB.set('sessionHistory', this.history);
+    this.render();
+  },
+  removeSession(id){
+    this.sessions = this.sessions.filter(s=>s.id!==id);
+    DB.set('savedSessions', this.sessions);
+    this.render();
+  },
+
+  render(){
+    document.getElementById('sessionSub').textContent = this.view==='recent'
+      ? this.history.length + ' recent'
+      : this.sessions.length + ' saved';
+    const list = document.getElementById('sessionList');
+    list.innerHTML = '';
+
+    if(this.view === 'recent'){
+      if(this.history.length===0){ list.innerHTML = '<div class="session-empty">Links you open from search or bookmarks show up here</div>'; return; }
+      this.history.forEach(h=>{
+        const li = document.createElement('li');
+        li.className = 'session-item';
+        const initial = (h.title||h.url).trim().charAt(0).toUpperCase() || '?';
+        li.innerHTML = `<div class="session-fav">${initial}</div><div class="session-info"><div class="session-title"></div><div class="session-url"></div></div><div class="session-actions"><span title="Reopen">↗</span><span title="Remove">✕</span></div>`;
+        li.querySelector('.session-title').textContent = h.title;
+        li.querySelector('.session-url').textContent = h.url.replace(/^https?:\/\//,'');
+        const [openBtn, delBtn] = li.querySelectorAll('.session-actions span');
+        openBtn.addEventListener('click', ()=>{ window.open(h.url,'_blank','noopener'); });
+        delBtn.addEventListener('click', ()=> this.removeHistory(h.url));
+        list.appendChild(li);
+      });
+    } else {
+      if(this.sessions.length===0){ list.innerHTML = '<div class="session-empty">No saved sessions yet — build up some recent tabs, then "Save current as session"</div>'; return; }
+      this.sessions.forEach(s=>{
+        const wrap = document.createElement('div');
+        wrap.className = 'session-group';
+        wrap.innerHTML = `
+          <div class="session-group-head">
+            <span class="session-group-name"></span>
+            <span class="session-group-count"></span>
+          </div>
+          <div class="session-footer" style="margin-top:0;">
+            <button class="btn small primary" data-act="open">Open all</button>
+            <button class="btn small danger" data-act="del">Delete</button>
+          </div>`;
+        wrap.querySelector('.session-group-name').textContent = s.name;
+        wrap.querySelector('.session-group-count').textContent = s.items.length + ' tabs';
+        wrap.querySelector('[data-act="open"]').addEventListener('click', ()=> this.openAll(s.items));
+        wrap.querySelector('[data-act="del"]').addEventListener('click', ()=> this.removeSession(s.id));
+        list.appendChild(wrap);
+      });
+    }
+  }
+};
+Session.init();
+
+/* ============================================================
+   VIDEO EMBED PANEL
+   Uses YouTube's official public embed player — the same iframe
+   endpoint YouTube provides for any website to use. This loads
+   video content honestly and visibly, not through a proxy.
+============================================================ */
+const Embed = {
+  saved: DB.get('embedSaved', []),
+
+  init(){
+    this.renderSaved();
+    document.getElementById('embedLoadBtn').addEventListener('click', ()=> this.loadFromInput());
+    document.getElementById('embedInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') this.loadFromInput(); });
+  },
+
+  extractId(raw){
+    raw = (raw||'').trim().replace(/^["'<]+|["'>]+$/g,'');
+    if(/^[a-zA-Z0-9_-]{11}$/.test(raw)) return raw;
+    const patterns = [
+      /(?:m\.|www\.)?youtube\.com\/watch\?(?:[^#]*&)?v=([a-zA-Z0-9_-]{11})/,
+      /(?:m\.|www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+      /(?:m\.|www\.)?youtube\.com\/live\/([a-zA-Z0-9_-]{11})/,
+      /(?:m\.|www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      /youtu\.be\/([a-zA-Z0-9_-]{11})/
+    ];
+    for(const p of patterns){
+      const m = raw.match(p);
+      if(m) return m[1];
+    }
+    return null;
+  },
+
+  loadFromInput(){
+    const val = document.getElementById('embedInput').value;
+    const id = this.extractId(val);
+    if(!id){ toast("Could not read a video from that link — try copying it straight from YouTube's share button"); return; }
+    this.load(id);
+    document.getElementById('embedInput').value = '';
+  },
+
+  load(id){
+    document.getElementById('embedStage').innerHTML =
+      `<iframe src="https://www.youtube-nocookie.com/embed/${id}" title="Video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+    const fallback = document.getElementById('embedFallback');
+    document.getElementById('embedFallbackLink').href = 'https://www.youtube.com/watch?v=' + id;
+    fallback.style.display = 'block';
+    this.saved = this.saved.filter(s=>s!==id);
+    this.saved.unshift(id);
+    if(this.saved.length>8) this.saved.length = 8;
+    DB.set('embedSaved', this.saved);
+    this.renderSaved();
+  },
+
+  removeSaved(id, e){
+    e.stopPropagation();
+    this.saved = this.saved.filter(s=>s!==id);
+    DB.set('embedSaved', this.saved);
+    this.renderSaved();
+  },
+
+  renderSaved(){
+    const wrap = document.getElementById('embedSaved');
+    wrap.innerHTML = '';
+    this.saved.forEach(id=>{
+      const t = document.createElement('div');
+      t.className = 'embed-thumb';
+      t.innerHTML = `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" loading="lazy" alt=""><div class="del">remove</div>`;
+      t.querySelector('img').addEventListener('click', ()=> this.load(id));
+      t.querySelector('.del').addEventListener('click', (e)=> this.removeSaved(id, e));
+      wrap.appendChild(t);
+    });
+  }
+};
+Embed.init();
+
+/* ============================================================
+   FOCUS MODE
+============================================================ */
+function enterFocus(){
+  document.getElementById('focusOverlay').classList.add('show');
+  if(!Timer.running){ Timer.toggle(); }
+}
+function exitFocus(){
+  document.getElementById('focusOverlay').classList.remove('show');
+}
+document.getElementById('focusBtn').addEventListener('click', enterFocus);
+document.getElementById('focusExit').addEventListener('click', exitFocus);
+document.getElementById('focusOverlay').addEventListener('click', (e)=>{ if(e.target.id==='focusOverlay') exitFocus(); });
+
+/* ============================================================
+   EXPORT DATA (local privacy feature — download your own data)
+============================================================ */
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const payload = {
+    tasks: DB.get('tasks',[]),
+    notes: DB.get('notes',''),
+    decks: DB.get('decks',[]),
+    bookmarks: DB.get('bookmarks',[]),
+    timerStats: DB.get('timerStats',{}),
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'studyhub-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Your data was downloaded — it never left your device');
+});
+
+/* ============================================================
+   COMMAND PALETTE
+============================================================ */
+const COMMANDS = [
+  {label:'Start focus timer', glyph:'◷', action:()=>{ if(!Timer.running) Timer.toggle(); toast('Timer started'); }},
+  {label:'Pause focus timer', glyph:'◷', action:()=>{ if(Timer.running) Timer.toggle(); }},
+  {label:'Reset timer', glyph:'◷', action:()=>Timer.reset()},
+  {label:'Enter focus mode', glyph:'◎', action:enterFocus},
+  {label:'Add a task', glyph:'✓', action:()=>document.getElementById('taskInput').focus()},
+  {label:'Add a bookmark', glyph:'＋', action:openBmModal},
+  {label:'New flashcard deck', glyph:'▤', action:openDeckModal},
+  {label:'Shuffle current deck', glyph:'⤮', action:()=>Cards.shuffle()},
+  {label:'Focus notes', glyph:'✎', action:()=>document.getElementById('notesArea').focus()},
+  {label:'Next quote', glyph:'❝', action:()=>document.getElementById('quoteNext').click()},
+  {label:'Export my data', glyph:'⇩', action:()=>document.getElementById('exportBtn').click()},
+  {label:'Switch to Google', glyph:'⌕', action:()=>{currentEngine='google'; DB.set('engine',currentEngine); paintEngine();}},
+  {label:'Switch to DuckDuckGo', glyph:'⌕', action:()=>{currentEngine='ddg'; DB.set('engine',currentEngine); paintEngine();}},
+  {label:'Switch to Wikipedia search', glyph:'⌕', action:()=>{currentEngine='wiki'; DB.set('engine',currentEngine); paintEngine();}},
+  {label:'Save current session', glyph:'▭', action:()=>Session.saveCurrent()},
+  {label:'Focus video panel', glyph:'▶', action:()=>document.getElementById('embedInput').focus()},
+];
+
+let cmdkSel = 0;
+let cmdkFiltered = COMMANDS;
+
+function openCmdk(){
+  document.getElementById('cmdk').classList.add('show');
+  document.getElementById('cmdkInput').value = '';
+  document.getElementById('cmdkInput').focus();
+  cmdkFiltered = COMMANDS;
+  cmdkSel = 0;
+  renderCmdk();
+}
+function closeCmdk(){
+  document.getElementById('cmdk').classList.remove('show');
+}
+function renderCmdk(){
+  const list = document.getElementById('cmdkList');
+  list.innerHTML = '';
+  if(cmdkFiltered.length === 0){
+    list.innerHTML = '<div class="cmdk-empty">No matching commands</div>';
+    return;
+  }
+  cmdkFiltered.forEach((c,i)=>{
+    const item = document.createElement('div');
+    item.className = 'cmdk-item' + (i===cmdkSel ? ' sel':'');
+    item.innerHTML = `<span class="g">${c.glyph}</span><span></span>`;
+    item.querySelector('span:last-child').textContent = c.label;
+    item.addEventListener('click', ()=>{ c.action(); closeCmdk(); });
+    list.appendChild(item);
+  });
+}
+document.getElementById('cmdkInput').addEventListener('input', (e)=>{
+  const q = e.target.value.toLowerCase();
+  cmdkFiltered = COMMANDS.filter(c=>c.label.toLowerCase().includes(q));
+  cmdkSel = 0;
+  renderCmdk();
+});
+document.getElementById('cmdkInput').addEventListener('keydown', (e)=>{
+  if(e.key==='ArrowDown'){ e.preventDefault(); cmdkSel = Math.min(cmdkSel+1, cmdkFiltered.length-1); renderCmdk(); }
+  if(e.key==='ArrowUp'){ e.preventDefault(); cmdkSel = Math.max(cmdkSel-1, 0); renderCmdk(); }
+  if(e.key==='Enter'){ if(cmdkFiltered[cmdkSel]){ cmdkFiltered[cmdkSel].action(); closeCmdk(); } }
+  if(e.key==='Escape'){ closeCmdk(); }
+});
+
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){
+    e.preventDefault();
+    document.getElementById('cmdk').classList.contains('show') ? closeCmdk() : openCmdk();
+  }
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){
+    e.preventDefault();
+    enterFocus();
+  }
+  if(e.key === 'Escape'){
+    if(document.getElementById('focusOverlay').classList.contains('show')) exitFocus();
+    closeCmdk();
+  }
+});
+
+/* click outside to close cmdk */
+document.addEventListener('click', (e)=>{
+  const cmdk = document.getElementById('cmdk');
+  if(cmdk.classList.contains('show') && !cmdk.contains(e.target)){
+    closeCmdk();
+  }
+});
+
+/* click outside modals to close */
+document.getElementById('bmOverlay').addEventListener('click', (e)=>{ if(e.target.id==='bmOverlay') e.currentTarget.classList.remove('show'); });
+document.getElementById('deckOverlay').addEventListener('click', (e)=>{ if(e.target.id==='deckOverlay') e.currentTarget.classList.remove('show'); });
+
+})();
+</script>
+</body>
+</html>
