@@ -1126,12 +1126,33 @@ const ENGINES = {
 let currentEngine = DB.get('engine', 'google');
 
 function paintEngine(){
-  document.querySelectorAll('.engine-pick button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.engine === currentEngine);
+  document.querySelectorAll('#enginePick button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.engine === currentEngine);
   });
   document.getElementById('engineNote').textContent = 'via ' + ENGINES[currentEngine].label;
 }
+
+const NEW_TAB_SITES = {
+  studyhub: {label:'StudyHub', url:'https://studyhub.mantavyagajjar.com/'},
+  xoeand:   {label:'Xoeand', url:'https://xoeand.glamourfreaks.com/'},
+  amazingtt:{label:'AmazingTT', url:'https://amazingtt.krepche.com/'}
+};
+let newTabTarget = DB.get('newTabTarget', 'studyhub');
+
+function paintNewTabTarget(){
+  const target = NEW_TAB_SITES[newTabTarget];
+  const btn = document.getElementById('tabNewBtn');
+  btn.title = 'Open new tab (' + target.label + ')';
+}
+function setNewTabTarget(key){
+  if(!NEW_TAB_SITES[key]) return;
+  newTabTarget = key;
+  DB.set('newTabTarget', newTabTarget);
+  paintNewTabTarget();
+  toast('New tab target set to ' + NEW_TAB_SITES[key].label);
+}
 paintEngine();
+paintNewTabTarget();
 
 document.getElementById('enginePick').addEventListener('click', (e)=>{
   const btn = e.target.closest('button');
@@ -1164,9 +1185,9 @@ document.getElementById('heroSearch').addEventListener('keydown', (e)=>{ if(e.ke
 document.getElementById('omniInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(e.target.value); });
 document.getElementById('refreshBtn').addEventListener('click', ()=> location.reload());
 document.getElementById('tabNewBtn').addEventListener('click', ()=>{
-  const url = 'https://amazingtt.krepche.com/';
-  window.open(url, '_blank', 'noopener');
-  Session.log('StudyHub', url);
+  const target = NEW_TAB_SITES[newTabTarget];
+  window.open(target.url, '_blank', 'noopener');
+  Session.log(target.label, target.url);
 });
 
 /* ============================================================
@@ -2104,6 +2125,9 @@ const COMMANDS = [
   {label:'Switch to Google', glyph:'⌕', action:()=>{currentEngine='google'; DB.set('engine',currentEngine); paintEngine();}},
   {label:'Switch to DuckDuckGo', glyph:'⌕', action:()=>{currentEngine='ddg'; DB.set('engine',currentEngine); paintEngine();}},
   {label:'Switch to Wikipedia search', glyph:'⌕', action:()=>{currentEngine='wiki'; DB.set('engine',currentEngine); paintEngine();}},
+  {label:'Set new tab target to StudyHub', glyph:'⌁', action:()=>setNewTabTarget('studyhub')},
+  {label:'Set new tab target to Strawberri', glyph:'⌁', action:()=>setNewTabTarget('xoeand')},
+  {label:'Set new tab target to AmazingTT', glyph:'⌁', action:()=>setNewTabTarget('amazingtt')},
   {label:'Save current session', glyph:'▭', action:()=>Session.saveCurrent()},
   {label:'Focus video panel', glyph:'▶', action:()=>document.getElementById('embedInput').focus()},
 ];
