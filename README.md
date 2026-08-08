@@ -1,3 +1,3 @@
 # Study-Hub
 
-SH; https://yuggy-duggy.github.io/Study-Hub/SH
+SH; https://yuggy-duggy.github.io/Study-Hub/
